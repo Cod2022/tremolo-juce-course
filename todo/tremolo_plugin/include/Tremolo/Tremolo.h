@@ -3,10 +3,16 @@
 namespace tremolo {
 class Tremolo {
 public:
+  enum class LfoWaveform : size_t {
+	sine = 0,
+  };
   Tremolo() {
 	// We can temporarily set frequency to 440Hz just to be able to hear the output of our LFO
 	// But for actual LFO we need the range between 1 and 20 HZ
-	lfo.setFrequency(5.f, true);
+	// Second argument "true" means that we can change the initial frequency of the oscillator
+	for (auto& lfo : lfos) {
+		lfo.setFrequency(5.f, true);
+	}
   }
   void prepare(double sampleRate, int expectedMaxFramesPerBlock) {
 
@@ -18,20 +24,25 @@ public:
 		.numChannels = 1u,
 	};
 	// Like this one for example
-	lfo.prepare(processSpec);
-
-
+	for (auto& lfo : lfos) {
+		lfo.prepare(processSpec);
+	}
   }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       // generate the LFO value
-	  const auto lfoValue = lfo.processSample(0.f);
+      const auto lfoValue = getNextLfoValue();
+
 	  // set the modulation depth
 	  constexpr auto modulationDepth = 0.4f;
       // calculate the modulation value
 	  const auto modulationValue = modulationDepth * lfoValue + 1.f;
+
+	  // if we don`t normalize lfoValue by adding +1 to it, we will get ring modulation effect
+	  //const auto modulationValue = modulationDepth * lfoValue;
+	
       // for each channel sample in the frame
       for (const auto channelIndex :
            std::views::iota(0, buffer.getNumChannels())) {
@@ -49,13 +60,23 @@ public:
 
   void reset() noexcept {
 	// Releasing our lfo resources
-	lfo.reset();
+	for (auto& lfo : lfos) {
+		lfo.reset();
+	}
   }
 
 private:
   // You should put class members and private functions here
+  // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index o our array lfos
+  float getNextLfoValue() {
+    return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
+  }
   
   // Creating an Oscillator class instance for our LFO
-  juce::dsp::Oscillator<float> lfo{ [](auto phase){ return std::sin(phase); }};
+  std::array<juce::dsp::Oscillator<float>, 1u> lfos {
+	juce::dsp::Oscillator<float> { [](auto phase){ return std::sin(phase); } }
+  };
+  // Creating a Enum instance for sine LFO
+  LfoWaveform currentLfo = LfoWaveform::sine;
 };
 }  // namespace tremolo
