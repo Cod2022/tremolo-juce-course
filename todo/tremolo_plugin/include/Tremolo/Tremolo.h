@@ -27,19 +27,19 @@ public:
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       // generate the LFO value
-	  const auto lfoValue = lfo.processSample(0.f); 
-
-      // TODO: calculate the modulation value
-
+	  const auto lfoValue = lfo.processSample(0.f);
+	  // set the modulation depth
+	  constexpr auto modulationDepth = 0.4f;
+      // calculate the modulation value
+	  const auto modulationValue = modulationDepth * lfoValue + 1.f;
       // for each channel sample in the frame
       for (const auto channelIndex :
            std::views::iota(0, buffer.getNumChannels())) {
         // get the input sample
         const auto inputSample = buffer.getSample(channelIndex, frameIndex);
 
-        // Checking our lfoValuue just by outputing it instead of the original input signal
-		// So we should hear its sound instead of that sended to our plugin
-        const auto outputSample = 0.1f * lfoValue;
+        // Applying modulation to the current input sample just by multiplying it by modulationValue;
+        const auto outputSample = inputSample * modulationValue;
 
         // set the output sample
         buffer.setSample(channelIndex, frameIndex, outputSample);
