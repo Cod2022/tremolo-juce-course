@@ -5,6 +5,7 @@ class Tremolo {
 public:
   enum class LfoWaveform : size_t {
 	sine = 0,
+	triangle = 1,git 
   };
   Tremolo() {
 	// We can temporarily set frequency to 440Hz just to be able to hear the output of our LFO
@@ -67,14 +68,21 @@ public:
 
 private:
   // You should put class members and private functions here
+  
+  // function for building a triangle waveform using the formula for the triangle waveform
+  static float triangle(float phase) {
+	const auto ft = phase / juce::MathConstants<float>::twoPi;// calculating "theta/2Pi" part of the formula first
+	return 4.f * std::abs(ft - std::floor(ft + 0.5f)) - 1.f;// applying the whole formula using the previous calculation in it
+	}
   // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index o our array lfos
   float getNextLfoValue() {
     return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
   }
   
   // Creating an Oscillator class instance for our LFO
-  std::array<juce::dsp::Oscillator<float>, 1u> lfos {
-	juce::dsp::Oscillator<float> { [](auto phase){ return std::sin(phase); } }
+  std::array<juce::dsp::Oscillator<float>, 2u> lfos {
+      juce::dsp::Oscillator<float>{[](auto phase) { return std::sin(phase); }},
+	  juce::dsp::Oscillator<float>{triangle},
   };
   // Creating a Enum instance for sine LFO
   LfoWaveform currentLfo = LfoWaveform::sine;
