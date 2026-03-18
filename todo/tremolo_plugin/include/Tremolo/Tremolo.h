@@ -28,6 +28,11 @@ public:
 	for (auto& lfo : lfos) {
 		lfo.prepare(processSpec);
 	}
+	// Resetting the SmoothedValue object parameters to 0 before processing. Second argument - ramp period in ms
+	blendAlpha.reset(0.f, 0.02f);
+	// Setting the current value of the SmoothedValue object to 1 (to avoid any processing in process function,
+	// unless waveform is changed to triangle (isSmoothing function will return "false" if the current value is 1.f) 
+	blendAlpha.setCurrentAndTargetValue(1.f);
   }
 
   void setLfoWaveform(LfoWaveform waveform) {
@@ -85,11 +90,16 @@ private:
   float getNextLfoValue() {
     return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
   }
-  // TODO: implement LFO waveshape change smoothing
   // Handler function to update LFO waveform
   void updateLfoWaveform() {
-	if (currentLfo != lfoToSet) {
+	// if the current waveform is different from what we need to set and the smoothing is not yet happening
+	if (currentLfo != lfoToSet && !blendAlpha.isSmoothing()) {
+		previousLfo = currentLfo;
 		currentLfo = lfoToSet;
+		// reset the current value of the SmoothedValue object to 0.f ("point" from which we start smoothing)
+		blendAlpha.setCurrentAndTargetValue(0.f);
+		// set the final target value ("point" we should reach at the end of the smoothing) 
+		blendAlpha.setTargetValue(1.f);
 	}
   }
   
@@ -100,8 +110,14 @@ private:
   };
   // Creating a Enum instance for sine LFO
   LfoWaveform currentLfo = LfoWaveform::sine;
+  // Creating another instance of LfoWaveform for our smoothing process
+  LfoWaveform previousLfo = LfoWaveform::sine;
   // Creating handler to change LFO waveform (if we do it in the currentLfo variable we might have clicks)
   LfoWaveform lfoToSet = currentLfo;
+
+  // Using the SmoothedValue class to smooth the transition between the sine and the triangle waveforms
+  // It will serve as an "alpha" parameter, like that one used in a linear interpolation process
+  juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
 
 };
 }  // namespace tremolo
