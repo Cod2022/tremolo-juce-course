@@ -5,7 +5,7 @@ class Tremolo {
 public:
   enum class LfoWaveform : size_t {
 	sine = 0,
-	triangle = 1,git 
+	triangle = 1, 
   };
   Tremolo() {
 	// We can temporarily set frequency to 440Hz just to be able to hear the output of our LFO
@@ -30,7 +30,14 @@ public:
 	}
   }
 
+  void setLfoWaveform(LfoWaveform waveform) {
+	// using jassert to perform a rintime check (in case user passes value more than 0 or 1)
+	jassert(waveform == LfoWaveform::sine || waveform == LfoWaveform::triangle);
+	lfoToSet = waveform;
+  }
+
   void process(juce::AudioBuffer<float>& buffer) noexcept {
+	updateLfoWaveform();
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       // generate the LFO value
@@ -74,9 +81,16 @@ private:
 	const auto ft = phase / juce::MathConstants<float>::twoPi;// calculating "theta/2Pi" part of the formula first
 	return 4.f * std::abs(ft - std::floor(ft + 0.5f)) - 1.f;// applying the whole formula using the previous calculation in it
 	}
-  // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index o our array lfos
+  // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index of our array lfos
   float getNextLfoValue() {
     return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
+  }
+  // TODO: implement LFO waveshape change smoothing
+  // Handler function to update LFO waveform
+  void updateLfoWaveform() {
+	if (currentLfo != lfoToSet) {
+		currentLfo = lfoToSet;
+	}
   }
   
   // Creating an Oscillator class instance for our LFO
@@ -86,5 +100,8 @@ private:
   };
   // Creating a Enum instance for sine LFO
   LfoWaveform currentLfo = LfoWaveform::sine;
+  // Creating handler to change LFO waveform (if we do it in the currentLfo variable we might have clicks)
+  LfoWaveform lfoToSet = currentLfo;
+
 };
 }  // namespace tremolo
