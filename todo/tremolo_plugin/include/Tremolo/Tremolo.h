@@ -29,7 +29,7 @@ public:
 		lfo.prepare(processSpec);
 	}
 	// Resetting the SmoothedValue object parameters to 0 before processing. Second argument - ramp period in ms
-	blendAlpha.reset(0.f, 0.02f);
+	blendAlpha.reset(sampleRate, 0.02f);
 	// Setting the current value of the SmoothedValue object to 1 (to avoid any processing in process function,
 	// unless waveform is changed to triangle (isSmoothing function will return "false" if the current value is 1.f) 
 	blendAlpha.setCurrentAndTargetValue(1.f);
@@ -43,10 +43,26 @@ public:
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
 	updateLfoWaveform();
+
     // for each frame
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       // generate the LFO value
-      const auto lfoValue = getNextLfoValue();
+      //const auto lfoValue = getNextLfoValue();
+	  
+	  // getting the current progress of the cross-fade (0.0 to 1.0)
+		const float alpha = blendAlpha.getNextValue();
+		float lfoValue = 0.f;
+		// if we switched the waveform and started smoothing process
+		if (blendAlpha.isSmoothing()) {
+			// generating both waveforms simultaneously to gradually blend them using smoothing process (linear interpolation)
+			const float oldVal = getNextLfoValue(previousLfo);
+			const float newVal = getNextLfoValue(currentLfo);
+			// using linear interpolation to smooth the transition between the waveforms
+			lfoValue = oldVal + alpha * (newVal - oldVal);
+		} else {
+			// just generating the current LFO waveform
+			lfoValue = getNextLfoValue(currentLfo);
+		}
 
 	  // set the modulation depth
 	  constexpr auto modulationDepth = 0.4f;
@@ -76,6 +92,8 @@ public:
 	for (auto& lfo : lfos) {
 		lfo.reset();
 	}
+	// resetting the current value of the SmoothedValue object to 1 (in case the user stops playback, we will start from this resetted value) 
+	blendAlpha.setCurrentAndTargetValue(1.f);
   }
 
 private:
@@ -87,8 +105,8 @@ private:
 	return 4.f * std::abs(ft - std::floor(ft + 0.5f)) - 1.f;// applying the whole formula using the previous calculation in it
 	}
   // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index of our array lfos
-  float getNextLfoValue() {
-    return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
+  float getNextLfoValue(LfoWaveform waveform) {
+    return lfos[juce::toUnderlyingType(waveform)].processSample(0.f);
   }
   // Handler function to update LFO waveform
   void updateLfoWaveform() {
