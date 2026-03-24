@@ -34,7 +34,8 @@ public:
   void setStateInformation(const void* data, int sizeInBytes) override;
 
 private:
-  // TODO: add parameters
+  //adding parameters
+  Parameters parameters{*this};
 
   Tremolo tremolo;
 

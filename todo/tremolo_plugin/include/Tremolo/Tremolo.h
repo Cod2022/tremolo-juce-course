@@ -28,7 +28,7 @@ public:
 	for (auto& lfo : lfos) {
 		lfo.prepare(processSpec);
 	}
-	// Resetting the SmoothedValue object parameters to 0 before processing. Second argument - ramp period in ms
+	// Resetting the SmoothedValue object parameters to 0 before processing. The second argument - ramp period is in ms
 	blendAlpha.reset(sampleRate, 0.02f);
 	// Setting the current value of the SmoothedValue object to 1 (to avoid any processing in process function,
 	// unless waveform is changed to triangle (isSmoothing function will return "false" if the current value is 1.f) 
@@ -39,6 +39,13 @@ public:
 	// using jassert to perform a rintime check (in case user passes value more than 0 or 1)
 	jassert(waveform == LfoWaveform::sine || waveform == LfoWaveform::triangle);
 	lfoToSet = waveform;
+  }
+
+  // setter for the Modulation rate parameter
+  void setModulationRate(float rateHz) {
+	for (auto& lfo : lfos) {
+		lfo.setFrequency(rateHz);
+	}
   }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
