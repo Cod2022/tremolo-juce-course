@@ -18,7 +18,7 @@ namespace {
 			5.f,
 			juce::AudioParameterFloatAttributes{}
 			.withLabel("Hz")
-			.withStringFromValueFunction([](float value, int /*maxLen*/) {// reducing the number of difits after the dot in a float number parameter
+			.withStringFromValueFunction([](float value, int /*maxLen*/) {// reducing the number of digits after the decimal in a float number parameter
 				return juce::String(value, 2);}));
 		// retrieving a reference to it
 		auto& parameterReference = *parameter;
@@ -28,12 +28,33 @@ namespace {
 		processor.addParameter(parameter.release());
 		return parameterReference;
 	}
+
+	juce::AudioParameterFloat& createGainParameter(juce::AudioProcessor& processor) {
+		constexpr auto versionHint = 1;
+		auto parameter = std::make_unique<juce::AudioParameterFloat>(
+			juce::ParameterID{"gain", versionHint},
+			"Gain",
+			juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f, 1.0f}, // using 0.01 interval to have 2 digits after the decimal and to increment just by one digit per one slider move
+			0.5f,
+			juce::AudioParameterFloatAttributes{}
+			.withLabel("%")
+			.withStringFromValueFunction([](float value, int /*max len*/) {
+				// Multiply by 100 to turn 0.5 into "50.0", using one digit after the decimal
+                return juce::String(value * 100.0f, 1); 
+				})
+			);
+		auto& parameterReference = *parameter;
+		processor.addParameter(parameter.release());
+		return parameterReference;
+	
+	}
 }
 Parameters::Parameters(juce::AudioProcessor& processor)
 // TODO: create parameters
 // TODO: retrieve references to parameters
 // add parameters to the processor
-    : rate{createModulationRateParameter(processor)}
+    : rate{createModulationRateParameter(processor)},
+      gain{createGainParameter(processor)}
 
 {
 }
