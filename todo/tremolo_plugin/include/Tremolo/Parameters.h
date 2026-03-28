@@ -5,6 +5,7 @@ struct Parameters {
   explicit Parameters(juce::AudioProcessor&);
 
   juce::AudioParameterFloat& rate;
+  juce::AudioParameterFloat& gain;
 
   // because of the reference member (juce::AudioParameterFloat& rate),
   // we use this macro to avoid accidental copies or moves of the Parameters struct
