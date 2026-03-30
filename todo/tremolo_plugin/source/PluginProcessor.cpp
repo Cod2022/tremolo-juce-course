@@ -55,7 +55,9 @@ void PluginProcessor::prepareToPlay(double sampleRate,
   // Use this method as the place to do any pre-playback
   // initialization that you need, e.g., allocate memory.
 
+  // setting the sample rate, block size and gain
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
+  tremolo.setGain(parameters.gain.get());
 }
 
 void PluginProcessor::releaseResources() {
@@ -104,6 +106,8 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
   // updating parameters while using the plugin
   tremolo.setModulationRate(parameters.rate.get());
+  tremolo.setGain(parameters.gain.get());
+
   // TODO: check for bypass
 
   // apply tremolo

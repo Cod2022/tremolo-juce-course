@@ -48,6 +48,9 @@ public:
 	}
   }
 
+  // setter for the gain parameter
+  void setGain(float newGain) { gain = newGain; }
+
   void process(juce::AudioBuffer<float>& buffer) noexcept {
 	updateLfoWaveform();
 
@@ -86,7 +89,7 @@ public:
         const auto inputSample = buffer.getSample(channelIndex, frameIndex);
 
         // Applying modulation to the current input sample just by multiplying it by modulationValue;
-        const auto outputSample = inputSample * modulationValue;
+        const auto outputSample = inputSample * modulationValue * gain;
 
         // set the output sample
         buffer.setSample(channelIndex, frameIndex, outputSample);
@@ -143,6 +146,9 @@ private:
   // Using the SmoothedValue class to smooth the transition between the sine and the triangle waveforms
   // It will serve as an "alpha" parameter, like that one used during the linear interpolation process
   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
+
+  // gain member parameter
+  float gain {0.5f};
 
 };
 }  // namespace tremolo
