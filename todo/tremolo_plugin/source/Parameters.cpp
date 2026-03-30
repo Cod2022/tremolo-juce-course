@@ -19,7 +19,7 @@ namespace {
 			juce::AudioParameterFloatAttributes{}
 			.withLabel("Hz")
 			.withStringFromValueFunction([](float value, int /*maxLen*/) {// reducing the number of digits after the decimal in a float number parameter
-				return juce::String(value, 2);}));
+				return juce::String(value, 1);}));
 		// retrieving a reference to it
 		auto& parameterReference = *parameter;
 		// releasing unique pointer to add the parameter to our processor
