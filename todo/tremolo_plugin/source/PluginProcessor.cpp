@@ -105,6 +105,8 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   }
 
   // updating parameters while using the plugin
+  // using "deferred parameter update" pattern - 
+  // updating parameters only once per block (not by every mouse move of the user) to avoid clicks
   tremolo.setModulationRate(parameters.rate.get());
   tremolo.setGain(parameters.gain.get());
 

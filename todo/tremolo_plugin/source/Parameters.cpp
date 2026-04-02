@@ -34,13 +34,15 @@ namespace {
 		auto parameter = std::make_unique<juce::AudioParameterFloat>(
 			juce::ParameterID{"gain", versionHint},
 			"Gain",
-			juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f, 1.0f}, // using 0.01 interval to have 2 digits after the decimal and to increment just by one digit per one slider move
+			juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f, 1.0f}, // using 0.01 to increment just by one digit per one slider move
 			0.5f,
 			juce::AudioParameterFloatAttributes{}
-			.withLabel("%")
+			.withLabel("dB")
 			.withStringFromValueFunction([](float value, int /*max len*/) {
-				// Multiply by 100 to turn 0.5 into "50.0", using one digit after the decimal
-                return juce::String(value * 100.0f, 1); 
+				// converting from a linear gain value to dB, showing -INF if the value is 0.0f
+				if (value <= 0.0f) return juce::String("-INF");
+				auto db = juce::Decibels::gainToDecibels(value);
+				return juce::String(db, 1);
 				})
 			);
 		auto& parameterReference = *parameter;
