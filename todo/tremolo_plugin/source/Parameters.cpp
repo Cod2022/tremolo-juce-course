@@ -34,7 +34,7 @@ namespace {
 		auto parameter = std::make_unique<juce::AudioParameterFloat>(
 			juce::ParameterID{"gain", versionHint},
 			"Gain",
-			juce::NormalisableRange<float>{0.0f, 1.0f, 0.01f, 1.0f}, // using 0.01 to increment just by one digit per one slider move
+			juce::NormalisableRange<float>{0.0f, 1.0f, 0.0f, 1.0f},
 			0.5f,
 			juce::AudioParameterFloatAttributes{}
 			.withLabel("dB")
