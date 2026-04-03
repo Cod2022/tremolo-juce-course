@@ -13,7 +13,7 @@ namespace {
 		// allocating memory for our AudioParameterFloat class
 		auto parameter = std::make_unique<juce::AudioParameterFloat>(
             juce::ParameterID{"modulation.rate", versionHint},
-			"Modulation rate", 
+			"Modulation rate",
 			juce::NormalisableRange<float>{0.1f, 20.f, 0.0f, 0.4f},
 			5.f,
 			juce::AudioParameterFloatAttributes{}
@@ -34,15 +34,15 @@ namespace {
 		auto parameter = std::make_unique<juce::AudioParameterFloat>(
 			juce::ParameterID{"gain", versionHint},
 			"Gain",
-			juce::NormalisableRange<float>{0.0f, 1.0f, 0.0f, 1.0f},
-			0.5f,
+			juce::NormalisableRange<float>{-12.0f, 12.0f, 0.1f, 1.0f},
+			0.0f,
 			juce::AudioParameterFloatAttributes{}
 			.withLabel("dB")
 			.withStringFromValueFunction([](float value, int /*max len*/) {
 				// converting from a linear gain value to dB, showing -INF if the value is 0.0f
-				if (value <= 0.0f) return juce::String("-INF");
-				auto db = juce::Decibels::gainToDecibels(value);
-				return juce::String(db, 1);
+				//if (value <= 0.0f) return juce::String("-INF");
+				//auto db = juce::Decibels::gainToDecibels(value);
+				return juce::String(value, 1);
 				})
 			);
 		auto& parameterReference = *parameter;

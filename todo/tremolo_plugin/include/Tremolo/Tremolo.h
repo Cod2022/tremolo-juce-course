@@ -149,7 +149,7 @@ private:
 
   // TO DO: convert to decibels
   // gain member parameter
-  float gain {0.5f};
+  float gain {1.0f};
 
 };
 }  // namespace tremolo
