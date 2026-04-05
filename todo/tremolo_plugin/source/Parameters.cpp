@@ -50,13 +50,18 @@ namespace {
 		return parameterReference;
 	
 	}
-}
+
+	juce::AudioParameterBool& createBypassedParameter(juce::AudioProcessor& processor) {
+		
+	}
+}// unnamed namespace
 Parameters::Parameters(juce::AudioProcessor& processor)
 // TODO: create parameters
 // TODO: retrieve references to parameters
 // add parameters to the processor
     : rate{createModulationRateParameter(processor)},
-      gain{createGainParameter(processor)}
+      gain{createGainParameter(processor)}, 
+	  bypassed{createBypassedParameter(processor)}
 
 {
 }
