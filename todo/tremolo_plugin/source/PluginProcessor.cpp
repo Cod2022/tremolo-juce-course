@@ -112,8 +112,10 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   // Convert dB parameter to linear gain and apply
   tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
 
-  // TODO: check for bypass
-
+  // checking for the bypass, if it`s on (true) - don`t process it in the tremolo.process
+  if (parameters.bypassed.get()) {
+	return;
+  }
   // apply tremolo
   tremolo.process(buffer);
 }
@@ -144,6 +146,11 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
 
   // TODO: implement state deserialization from JSON
 }
+
+	// returning the address of the bypass parameter (our member variable in the Parameters.h struct) 
+	juce::AudioProcessorParameter* PluginProcessor::getBypassParameter() const {
+		return &parameters.bypassed;
+	}
 }  // namespace tremolo
 
 // This creates new instances of the plugin.

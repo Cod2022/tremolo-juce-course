@@ -6,6 +6,7 @@ struct Parameters {
 
   juce::AudioParameterFloat& rate;
   juce::AudioParameterFloat& gain;
+  juce::AudioParameterBool& bypassed;
 
   // because of the reference member (juce::AudioParameterFloat& rate),
   // we use this macro to avoid accidental copies or moves of the Parameters struct

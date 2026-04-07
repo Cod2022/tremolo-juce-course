@@ -33,6 +33,9 @@ public:
   void getStateInformation(juce::MemoryBlock& destData) override;
   void setStateInformation(const void* data, int sizeInBytes) override;
 
+  // overrideing this function to implement our own bypass parameter
+  juce::AudioProcessorParameter* getBypassParameter() const override;
+
 private:
   //adding parameters
   Parameters parameters{*this};
