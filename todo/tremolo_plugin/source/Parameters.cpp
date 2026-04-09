@@ -62,6 +62,7 @@ namespace {
 		return addParameterToProcessor(processor, std::move(parameter));
 	}
 }// unnamed namespace
+
 Parameters::Parameters(juce::AudioProcessor& processor)
 // TODO: create parameters
 // TODO: retrieve references to parameters
