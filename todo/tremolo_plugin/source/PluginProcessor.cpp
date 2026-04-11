@@ -59,6 +59,13 @@ void PluginProcessor::prepareToPlay(double sampleRate,
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
   // Convert dB parameter to linear gain and apply
   tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
+
+  bypassTransitionSmoother.prepare( {
+	  .sampleRate = sampleRate,
+	  .maximumBlockSize = static_cast<juce::uint32>(expectedMaxFramesPerBlock),
+	  .numChannels = static_cast<juce::uint32>(
+		  juce::jmax(getTotalNumInputChannels(), getTotalNumOutputChannels())),
+	  });
 }
 
 void PluginProcessor::releaseResources() {
@@ -66,6 +73,7 @@ void PluginProcessor::releaseResources() {
   // spare memory, etc.
 
   tremolo.reset();
+  bypassTransitionSmoother.reset();
 }
 
 bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
@@ -111,13 +119,19 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   tremolo.setModulationRate(parameters.rate.get());
   // Convert dB parameter to linear gain and apply
   tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
+  bypassTransitionSmoother.setBypass(parameters.bypassed.get());
 
-  // checking for the bypass, if it`s on (true) - don`t process it in the tremolo.process
-  if (parameters.bypassed.get()) {
+  // checking for the bypass, if it`s on (true) and if transition smoothing is not happening - don`t process it in the tremolo.process
+  if (parameters.bypassed.get() && !bypassTransitionSmoother.isTransitioning()) {
 	return;
   }
+
+  // applying bypass smoothing
+  bypassTransitionSmoother.setDryBuffer(buffer);
   // apply tremolo
   tremolo.process(buffer);
+
+  bypassTransitionSmoother.mixToWetBuffer(buffer);
 }
 
 bool PluginProcessor::hasEditor() const {
