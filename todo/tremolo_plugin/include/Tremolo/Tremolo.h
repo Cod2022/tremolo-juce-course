@@ -29,10 +29,12 @@ public:
 		lfo.prepare(processSpec);
 	}
 	// Resetting the SmoothedValue object parameters to 0 before processing. The second argument - ramp period is in ms
-	blendAlpha.reset(sampleRate, 0.02f);
+	blendAlpha.reset(processSpec.sampleRate, 0.02f);
 	// Setting the current value of the SmoothedValue object to 1 (to avoid any processing in process function,
 	// unless waveform is changed to triangle (isSmoothing function will return "false" if the current value is 1.f) 
 	blendAlpha.setCurrentAndTargetValue(1.f);
+	
+	smoothedGain.reset(processSpec.sampleRate, 0.02f);
   }
 
   void setLfoWaveform(LfoWaveform waveform) {
@@ -49,7 +51,7 @@ public:
   }
 
   // setter for the Gain parameter
-  void setGain(float newGain) { gain = newGain; }
+  void setGain(float newGain) { smoothedGain.setTargetValue(newGain); }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
 	updateLfoWaveform();
@@ -58,7 +60,8 @@ public:
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
       // generate the LFO value
       //const auto lfoValue = getNextLfoValue();
-	  
+		// getting the current smoothed gain value
+		const float currentGain = smoothedGain.getNextValue();
 	  // getting the current progress of the cross-fade (0.0 to 1.0)
 		const float alpha = blendAlpha.getNextValue();
 		float lfoValue = 0.f;
@@ -79,7 +82,7 @@ public:
       // calculate the modulation value
 	  const auto modulationValue = modulationDepth * lfoValue + 1.f;
 
-	  // if we don`t normalize lfoValue by adding +1 to it, we will get ring modulation effect
+	  // if we don`t normalise lfoValue by adding +1 to it, we will get ring modulation effect
 	  //const auto modulationValue = modulationDepth * lfoValue;
 	
       // for each channel sample in the frame
@@ -89,7 +92,7 @@ public:
         const auto inputSample = buffer.getSample(channelIndex, frameIndex);
 
         // Applying modulation to the current input sample just by multiplying it by modulationValue;
-        const auto outputSample = inputSample * modulationValue * gain;
+        const auto outputSample = inputSample * modulationValue * currentGain;
 
         // set the output sample
         buffer.setSample(channelIndex, frameIndex, outputSample);
@@ -148,7 +151,8 @@ private:
   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
 
   // gain member parameter
-  float gain {1.0f};
+  //float gain {1.0f};
+  juce::LinearSmoothedValue<float> smoothedGain{1.0f};
 
 };
 }  // namespace tremolo
