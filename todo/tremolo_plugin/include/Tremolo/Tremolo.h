@@ -147,7 +147,6 @@ private:
   // It will serve as an "alpha" parameter, like that one used during the linear interpolation process
   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
 
-  // TO DO: convert to decibels
   // gain member parameter
   float gain {1.0f};
 
