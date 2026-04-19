@@ -38,7 +38,7 @@ public:
   }
 
   void setLfoWaveform(LfoWaveform waveform) {
-	// using jassert to perform a rintime check (in case user passes value more than 0 or 1)
+	// using jassert to perform a runtime check (in case the user passes a value more than 0 or 1)
 	jassert(waveform == LfoWaveform::sine || waveform == LfoWaveform::triangle);
 	lfoToSet = waveform;
   }
