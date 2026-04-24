@@ -9,7 +9,7 @@ namespace {
 		auto& parameterReference = *parameter;
 		// releasing unique pointer to add the parameter to our processor
 		// we need to do that because addParameter deletes the object by itself
-		// So would std::make::unique. That`s why we are releasing it to addParameter - to prevent double deleting of the same object
+		// So does std::make::unique. That`s why we need to release it to addParameter - to prevent double deleting of the same object
 		processor.addParameter(parameter.release());
 		return parameterReference;
 	}
@@ -61,16 +61,25 @@ namespace {
 			false);
 		return addParameterToProcessor(processor, std::move(parameter));
 	}
+
+	juce::AudioParameterChoice& createWaveformParameter(juce::AudioProcessor& processor) {
+		constexpr auto versionHint = 1;
+		auto parameter = std::make_unique<juce::AudioParameterChoice>(
+			juce::ParameterID{"modulation.waveform", versionHint}, 
+			"Modulation waveform", 
+			juce::StringArray{"Sine", "Triangle"}, 
+			0);
+		return addParameterToProcessor(processor, std::move(parameter));
+	}
 }// unnamed namespace
 
 Parameters::Parameters(juce::AudioProcessor& processor)
-// TODO: create parameters
-// TODO: retrieve references to parameters
 // add parameters to the processor
     : rate{createModulationRateParameter(processor)},
       gain{createGainParameter(processor)}, 
-	  bypassed{createBypassedParameter(processor)}
-
+	  bypassed{createBypassedParameter(processor)},
+	  waveform{createWaveformParameter(processor)}
 {
 }
+
 }  // namespace tremolo

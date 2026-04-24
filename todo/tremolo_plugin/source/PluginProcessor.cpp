@@ -120,6 +120,7 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   // Convert dB parameter to linear gain and apply
   tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
   bypassTransitionSmoother.setBypass(parameters.bypassed.get());
+  tremolo.setLfoWaveform(static_cast<Tremolo::LfoWaveform>(parameters.waveform.getIndex()));
 
   // checking for the bypass, if it`s on (true) and if transition smoothing is not happening - don`t process it in the tremolo.process
   if (parameters.bypassed.get() && !bypassTransitionSmoother.isTransitioning()) {
