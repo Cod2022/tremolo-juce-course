@@ -150,7 +150,9 @@ void PluginProcessor::getStateInformation(juce::MemoryBlock& destData) {
   // as intermediaries to make it easy to save and load complex data.
   juce::ignoreUnused(destData);
 
-  // TODO: implement state serialization to JSON
+  // MemoryOutputStream is capable of using a MemoryBlock instance (which is needed for our JsonSerializer)
+  juce::MemoryOutputStream outputStream{destData, true};
+  JsonSerializer::serialize(parameters, outputStream);
 }
 
 void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
@@ -159,7 +161,10 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
   // call.
   juce::ignoreUnused(data, sizeInBytes);
 
-  // TODO: implement state deserialization from JSON
+  // MemoryInputStream is used to handle const void* data memory block
+  juce::MemoryInputStream inputStream{data, static_cast<size_t>(sizeInBytes), false};
+  JsonSerializer::deserialize(inputStream, parameters);
+
 }
 
 	// returning the address of the bypass parameter (our member variable in the Parameters.h struct) 
