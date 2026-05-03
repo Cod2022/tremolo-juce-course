@@ -163,7 +163,16 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
 
   // MemoryInputStream is used to handle const void* data memory block
   juce::MemoryInputStream inputStream{data, static_cast<size_t>(sizeInBytes), false};
-  JsonSerializer::deserialize(inputStream, parameters);
+  // saving the result of work of JsonSerializer (it returns json::Result instance which handles posiible errors which might occur during deserialization)
+  const auto result = JsonSerializer::deserialize(inputStream, parameters);
+
+  // If there is an error during deserialization, we output it to the debug cosole
+  if (result.failed()) {
+	DBG(result.getErrorMessage());
+  }
+
+  // calling setBypassForsed for the bypass parameter to avoid any parameter transition smoothing during deserialization
+  bypassTransitionSmoother.setBypassForced(parameters.bypassed.get());
 
 }
 
