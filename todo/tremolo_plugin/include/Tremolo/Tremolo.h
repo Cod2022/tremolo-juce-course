@@ -52,6 +52,8 @@ public:
 
   // setter for the Gain parameter
   void setGain(float newGain) { smoothedGain.setTargetValue(newGain); }
+  // forced setter for the deserialization process
+  void setGainForced (float newGain) { smoothedGain.setCurrentAndTargetValue(newGain); }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
 	updateLfoWaveform();

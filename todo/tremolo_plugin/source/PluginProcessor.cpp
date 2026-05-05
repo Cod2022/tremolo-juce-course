@@ -173,6 +173,8 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
 
   // calling setBypassForsed for the bypass parameter to avoid any parameter transition smoothing during deserialization
   bypassTransitionSmoother.setBypassForced(parameters.bypassed.get());
+  // doing the same for the other parameters
+  tremolo.setGainForced(juce::Decibels::decibelsToGain(parameters.gain.get()));
 
 }
 
