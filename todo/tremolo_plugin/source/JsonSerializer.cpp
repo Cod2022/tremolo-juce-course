@@ -16,7 +16,14 @@ struct SerializableParameters {
 		}
 
 		// TREMOLO_PLUGIN_NAME is a preprocessor definition specified in the CMakeLists.txt
-		archive(named("pluginName", TREMOLO_PLUGIN_NAME));
+		// We save plugin name into a mutable std::string variable because it should be overriten when deserializing 
+		std::string pluginName = TREMOLO_PLUGIN_NAME;
+
+		archive(named("pluginName", pluginName));
+		// abort further parsing if plugin name does not match
+		if (pluginName != TREMOLO_PLUGIN_NAME) {
+			return;
+		}
 		archive(named("modulationRateHz", t.rate), named("bypassed", t.bypassed),
 			named("modulationWaveform", t.waveform));
 	
@@ -37,7 +44,7 @@ void JsonSerializer::serialize(const Parameters& parameters,
     // serialize parameters to the output stream as JSON
 	const auto parametersToSerialize = from(parameters);
 	const auto json = juce::ToVar::convert(parametersToSerialize);
-	// abort serialization if the convertion fails (json does not have value)
+	// abort serialization if the convertion fails (JSON does not have value)
 	if (!json.has_value()) {
 		return;
 	}
@@ -51,10 +58,29 @@ void JsonSerializer::serialize(const Parameters& parameters,
 
 juce::Result JsonSerializer::deserialize(juce::InputStream& input,
                                          Parameters& parameters) {
-  juce::ignoreUnused(input, parameters);
 
-  // TODO: deserialize parameters from the JSON input stream
+  // deserialize parameters from the JSON input stream
+	juce::var parsedResult;
+	const auto result = juce::JSON::parse(input.readEntireStreamAsString(),
+		parsedResult);
 
-  return juce::Result::fail("not implemented");
+	if (result.failed()) {
+		return result;
+	}
+
+	const auto parsedParameters = juce::FromVar::convert<SerializableParameters>(parsedResult);
+
+	if (!parsedParameters.has_value()) {
+		return juce::Result::fail("failed to parse parameters from JSON representation");
+	}
+	// get the index of a waveform because parameters.waveform can not be assigned with a string, it needs the index of a chosen waveform
+	const auto modulationWaveformIndex = parameters.waveform.choices.indexOf(
+		parsedParameters->waveform);
+	parameters.waveform = modulationWaveformIndex;
+	parameters.rate = parsedParameters->rate;
+	parameters.bypassed = parsedParameters->bypassed;
+
+
+  return juce::Result::ok();
 }
 }  // namespace tremolo
