@@ -148,6 +148,8 @@ private:
   // Creating handler to change LFO waveform (if we do it in the currentLfo variable we might have clicks)
   LfoWaveform lfoToSet = currentLfo;
 
+  // TODO: write a separate class for the transition smoothing between the waveforms
+  // 
   // Using the SmoothedValue class to smooth the transition between the sine and the triangle waveforms
   // It will serve as an "alpha" parameter, like that one used during the linear interpolation process
   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
