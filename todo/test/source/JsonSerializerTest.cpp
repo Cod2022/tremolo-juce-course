@@ -15,6 +15,7 @@ TEST(JsonSerializer, SerializeToString) {
   "__version__": 1,
   "pluginName": "Tremolo Plugin",
   "modulationRateHz": 10.0,
+  "gain": 0.0,
   "bypassed": true,
   "modulationWaveform": "Triangle"
 })";
@@ -35,6 +36,7 @@ TEST(JsonSerializer, DeserializeFromString) {
   "__version__": 1,
   "pluginName": "Tremolo Plugin",
   "modulationRateHz": 10.0,
+  "gain": 0.0,
   "bypassed": true,
   "modulationWaveform": "Triangle"
 })";
