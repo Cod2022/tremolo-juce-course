@@ -50,6 +50,9 @@ public:
 	}
   }
 
+  // setter for the Modulation depth parameter
+  void setModulationDepth(float newModDepth) { modulationDepth = newModDepth; }
+
   // setter for the Gain parameter
   void setGain(float newGain) { smoothedGain.setTargetValue(newGain); }
   // forced setter for the deserialization process
@@ -80,7 +83,7 @@ public:
 		}
 
 	  // set the modulation depth
-	  constexpr auto modulationDepth = 0.4f;
+	  //constexpr auto modulationDepth = 0.4f;
       // calculate the modulation value
 	  const auto modulationValue = modulationDepth * lfoValue + 1.f;
 
@@ -155,8 +158,9 @@ private:
   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> blendAlpha;
 
   // gain member parameter
-  //float gain {1.0f};
   juce::LinearSmoothedValue<float> smoothedGain{1.0f};
+  // modulation depth member parameter
+  float modulationDepth = 0.4f;
 
 };
 }  // namespace tremolo
