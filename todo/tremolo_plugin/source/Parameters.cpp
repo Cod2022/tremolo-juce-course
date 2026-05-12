@@ -33,6 +33,21 @@ namespace {
 		return addParameterToProcessor(processor, std::move(parameter));	
 	}
 
+	juce::AudioParameterFloat& createModulationDepthParameter(juce::AudioProcessor& processor) {
+		constexpr auto versionHint = 1;
+		auto parameter = std::make_unique<juce::AudioParameterFloat>(
+			juce::ParameterID{"modulation.depth", versionHint},
+			"Modulation depth",
+			juce::NormalisableRange<float>{0.0f, 1.0f, 0.0f, 0.4f},
+			0.4f,
+			juce::AudioParameterFloatAttributes{}
+			.withLabel("%")
+			.withStringFromValueFunction([](float value, int /*maxlen*/) {
+				return juce::String(value * 100.f, 1);}));
+		return addParameterToProcessor(processor, std::move(parameter));
+		
+	}
+
 	juce::AudioParameterFloat& createGainParameter(juce::AudioProcessor& processor) {
 		constexpr auto versionHint = 1;
 		auto parameter = std::make_unique<juce::AudioParameterFloat>(
@@ -76,6 +91,7 @@ namespace {
 Parameters::Parameters(juce::AudioProcessor& processor)
 // add parameters to the processor
     : rate{createModulationRateParameter(processor)},
+	  modDepth{createModulationDepthParameter(processor)},
       gain{createGainParameter(processor)}, 
 	  bypassed{createBypassedParameter(processor)},
 	  waveform{createWaveformParameter(processor)}

@@ -82,8 +82,6 @@ public:
 			lfoValue = getNextLfoValue(currentLfo);
 		}
 
-	  // set the modulation depth
-	  //constexpr auto modulationDepth = 0.4f;
       // calculate the modulation value
 	  const auto modulationValue = modulationDepth * lfoValue + 1.f;
 

@@ -117,6 +117,7 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
   // using "deferred parameter update" pattern - 
   // updating parameters only once per block (not by every mouse move of the user) to avoid clicks
   tremolo.setModulationRate(parameters.rate.get());
+  tremolo.setModulationDepth(parameters.modDepth.get());
   // Convert dB parameter to linear gain and apply
   tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
   bypassTransitionSmoother.setBypass(parameters.bypassed.get());
