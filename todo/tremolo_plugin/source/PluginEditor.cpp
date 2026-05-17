@@ -3,11 +3,19 @@ PluginEditor::PluginEditor(PluginProcessor& p) : AudioProcessorEditor(&p) {
   background.setImage(juce::ImageCache::getFromMemory(
       assets::Background_png, assets::Background_pngSize));
 
-  logo.setImage(
+  logoLeft.setImage(
       juce::ImageCache::getFromMemory(assets::Logo_png, assets::Logo_pngSize));
 
+  logoCentre.setImage(
+	  juce::ImageCache::getFromMemory(assets::Logo_png, assets::Logo_pngSize));
+
+  logoRight.setImage(
+	  juce::ImageCache::getFromMemory(assets::Logo_png, assets::Logo_pngSize));
+
   addAndMakeVisible(background);
-  addAndMakeVisible(logo);
+  addAndMakeVisible(logoLeft);
+  addAndMakeVisible(logoCentre);
+  addAndMakeVisible(logoRight);
 
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
@@ -16,9 +24,14 @@ PluginEditor::PluginEditor(PluginProcessor& p) : AudioProcessorEditor(&p) {
 
 void PluginEditor::resized() {
   const auto bounds = getLocalBounds();
-
   background.setBounds(bounds);
 
-  logo.setBounds({16, 16, 105, 24});
+  DBG("x: " << bounds.getX() << ", y: " << bounds.getY() << ", width: " << bounds.getWidth() << ", height: " << bounds.getHeight());
+  DBG(bounds.toString());
+
+  const auto logoArea = juce::Rectangle<int>{16, 16, 105, 24};
+  logoLeft.setBounds(logoArea);
+  logoCentre.setBounds(logoArea.withX(bounds.getCentreX() - (logoArea.getWidth() / 2)));
+  logoRight.setBounds(logoArea.withX(bounds.getRight() - logoArea.getX() - logoArea.getWidth()));
 }
 }  // namespace tremolo

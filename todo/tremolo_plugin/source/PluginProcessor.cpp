@@ -55,7 +55,17 @@ void PluginProcessor::prepareToPlay(double sampleRate,
   // Use this method as the place to do any pre-playback
   // initialization that you need, e.g., allocate memory.
 
+  // setting the sample rate, block size and gain
   tremolo.prepare(sampleRate, expectedMaxFramesPerBlock);
+  // Convert dB parameter to linear gain and apply
+  tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
+
+  bypassTransitionSmoother.prepare( {
+	  .sampleRate = sampleRate,
+	  .maximumBlockSize = static_cast<juce::uint32>(expectedMaxFramesPerBlock),
+	  .numChannels = static_cast<juce::uint32>(
+		  juce::jmax(getTotalNumInputChannels(), getTotalNumOutputChannels())),
+	  });
 }
 
 void PluginProcessor::releaseResources() {
@@ -63,6 +73,7 @@ void PluginProcessor::releaseResources() {
   // spare memory, etc.
 
   tremolo.reset();
+  bypassTransitionSmoother.reset();
 }
 
 bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const {
@@ -102,39 +113,74 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     buffer.clear(channelToClear, 0, buffer.getNumSamples());
   }
 
-  // TODO: update parameters
-  // TODO: check for bypass
+  // updating parameters while using the plugin
+  // using "deferred parameter update" pattern - 
+  // updating parameters only once per block (not by every mouse move of the user) to avoid clicks
+  tremolo.setModulationRate(parameters.rate.get());
+  tremolo.setModulationDepth(parameters.modDepth.get());
+  // Convert dB parameter to linear gain and apply
+  tremolo.setGain(juce::Decibels::decibelsToGain(parameters.gain.get()));
+  bypassTransitionSmoother.setBypass(parameters.bypassed.get());
+  tremolo.setLfoWaveform(static_cast<Tremolo::LfoWaveform>(parameters.waveform.getIndex()));
 
+  // checking for the bypass, if it`s on (true) and if transition smoothing is not happening - don`t process it in the tremolo.process
+  if (parameters.bypassed.get() && !bypassTransitionSmoother.isTransitioning()) {
+	return;
+  }
+
+  // applying bypass smoothing
+  bypassTransitionSmoother.setDryBuffer(buffer);
   // apply tremolo
   tremolo.process(buffer);
+
+  bypassTransitionSmoother.mixToWetBuffer(buffer);
 }
 
 bool PluginProcessor::hasEditor() const {
-  return false;
+  return true;
 }
 
 // This function will be called to create an instance of the editor
 juce::AudioProcessorEditor* PluginProcessor::createEditor() {
-  return nullptr;
+  return new PluginEditor(*this);
 }
 
 void PluginProcessor::getStateInformation(juce::MemoryBlock& destData) {
   // You should use this method to store your parameters in the memory block.
   // You could do that either as raw data, or use the XML or ValueTree classes
   // as intermediaries to make it easy to save and load complex data.
-  juce::ignoreUnused(destData);
 
-  // TODO: implement state serialization to JSON
+  // MemoryOutputStream is capable of using a MemoryBlock instance (which is needed for our JsonSerializer)
+  juce::MemoryOutputStream outputStream{destData, true};
+  JsonSerializer::serialize(parameters, outputStream);
 }
 
 void PluginProcessor::setStateInformation(const void* data, int sizeInBytes) {
   // You should use this method to restore your parameters from this memory
   // block, whose contents will have been created by the getStateInformation()
   // call.
-  juce::ignoreUnused(data, sizeInBytes);
 
-  // TODO: implement state deserialization from JSON
+  // MemoryInputStream is used to handle const void* data memory block
+  juce::MemoryInputStream inputStream{data, static_cast<size_t>(sizeInBytes), false};
+  // saving the result of work of JsonSerializer (it returns json::Result instance which handles posiible errors which might occur during deserialization)
+  const auto result = JsonSerializer::deserialize(inputStream, parameters);
+
+  // If there is an error during deserialization, we output it to the debug cosole
+  if (result.failed()) {
+	DBG(result.getErrorMessage());
+  }
+
+  // calling setBypassForsed for the bypass parameter to avoid any parameter transition smoothing during deserialization
+  bypassTransitionSmoother.setBypassForced(parameters.bypassed.get());
+  // doing the same for the other parameters
+  tremolo.setGainForced(juce::Decibels::decibelsToGain(parameters.gain.get()));
+
 }
+
+	// returning the address of the bypass parameter (our member variable in the Parameters.h struct) 
+	juce::AudioProcessorParameter* PluginProcessor::getBypassParameter() const {
+		return &parameters.bypassed;
+	}
 }  // namespace tremolo
 
 // This creates new instances of the plugin.
