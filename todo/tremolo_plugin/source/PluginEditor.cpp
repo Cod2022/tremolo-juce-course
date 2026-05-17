@@ -31,7 +31,7 @@ void PluginEditor::resized() {
 
   const auto logoArea = juce::Rectangle<int>{16, 16, 105, 24};
   logoLeft.setBounds(logoArea);
-  logoCentre.setBounds(logoArea.withCentre(bounds.getCentre()).withY(logoArea.getY()));
+  logoCentre.setBounds(logoArea.withX(bounds.getCentreX() - (logoArea.getWidth() / 2)));
   logoRight.setBounds(logoArea.withX(bounds.getRight() - logoArea.getX() - logoArea.getWidth()));
 }
 }  // namespace tremolo
