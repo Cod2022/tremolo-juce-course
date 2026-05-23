@@ -16,6 +16,7 @@ PluginEditor::PluginEditor(PluginProcessor& p) : AudioProcessorEditor(&p) {
   addAndMakeVisible(logoLeft);
   addAndMakeVisible(logoCentre);
   addAndMakeVisible(logoRight);
+  addAndMakeVisible(lfoVisualizer);
 
   // Make sure that before the constructor has finished, you've set the
   // editor's size to whatever you need it to be.
@@ -33,5 +34,7 @@ void PluginEditor::resized() {
   logoLeft.setBounds(logoArea);
   logoCentre.setBounds(logoArea.withX(bounds.getCentreX() - (logoArea.getWidth() / 2)));
   logoRight.setBounds(logoArea.withX(bounds.getRight() - logoArea.getX() - logoArea.getWidth()));
+
+  lfoVisualizer.setBounds({18, 149, 504, 92});
 }
 }  // namespace tremolo
