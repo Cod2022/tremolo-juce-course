@@ -35,6 +35,7 @@ void PluginEditor::resized() {
   logoCentre.setBounds(logoArea.withX(bounds.getCentreX() - (logoArea.getWidth() / 2)));
   logoRight.setBounds(logoArea.withX(bounds.getRight() - logoArea.getX() - logoArea.getWidth()));
 
+  // set bounds for our LfoVisualizer
   lfoVisualizer.setBounds({18, 149, 504, 92});
 }
 }  // namespace tremolo
