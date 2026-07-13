@@ -111,15 +111,14 @@ public:
 	// resetting the current value of the SmoothedValue object to 1 (in case the user stops playback, we will start from this resetted value) 
 	blendAlpha.setCurrentAndTargetValue(1.f);
   }
-
-private:
-  // You should put class members and private functions here
   
   // function for building a triangle waveform using the formula for the triangle waveform
   static float triangle(float phase) {
 	const auto ft = phase / juce::MathConstants<float>::twoPi;// calculating "theta/2Pi" part of the formula first
 	return 4.f * std::abs(ft - std::floor(ft + 0.5f)) - 1.f;// applying the whole formula using the previous calculation in it
 	}
+
+private:
   // using toUnderlyingType instead of static_cast to cast Enum class to size_t type for using it as an index of our array lfos
   float getNextLfoValue(LfoWaveform waveform) {
     return lfos[juce::toUnderlyingType(waveform)].processSample(0.f);
