@@ -40,10 +40,19 @@ public:
 			repaint();
 		}
 	}
+
+	void setStrokeWidth(float newStrokeWidth) { 
+		strokeWidth = newStrokeWidth;
+		resized();
+		repaint();
+	}
+
+	float getStrokeWidth() const { return strokeWidth; }
+
 private:
 	// class which specifies the type of the curves to draw
 	juce::Path waveformPath;
-	const float strokeWidth = 4.f;
+	float strokeWidth = 4.f;
 	Tremolo::LfoWaveform currentWaveform = Tremolo::LfoWaveform::triangle;
 
 	// alias for a waveform math function pointer, allowing uniform storage in a std::array

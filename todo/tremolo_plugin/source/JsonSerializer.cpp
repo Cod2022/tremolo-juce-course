@@ -4,7 +4,6 @@ struct SerializableParameters {
   float gain;
   bool bypassed;
   juce::String waveform;
-  // TODO: add gain parameter to serialize
 
   static constexpr auto marshallingVersion = 1;
 
